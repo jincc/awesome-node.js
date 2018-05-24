@@ -2,14 +2,10 @@ var http = require('http')
 var path = require('path')
 var fs = require('fs')
 var mime = require('mime')
+//处理基于socket。io服务端聊天功能的模块
+var chatServer = require('./libs/chat_server')
 
-//https://blog.csdn.net/fwj380891124/article/details/51460634
 var CACHES = {}
-
-
-
-
-
 function send404(response){
     response.writeHead(404,{'Content-Type':'text/plain'})
     response.write('Error 404:resource not found')
@@ -26,9 +22,6 @@ function serveStatic(response,cache,absPath){
     if (cache[absPath]){
         sendFile(response,absPath,cache[absPath])
     }else{
-        // fs.exists(absPath,function(exist){
-
-        // })
         fs.exists(absPath,(exist) => {
             if (exist){
                 //读取
@@ -56,8 +49,9 @@ var server = http.createServer((request,response)=>{
     }
     serveStatic(response,CACHES,path.join(__dirname,filePath))
 })
+//启动socket.io
+chatServer.listen(server)
 
 server.listen(3000,()=>{
     console.log('server start listen 3000')
 })
-
