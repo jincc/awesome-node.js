@@ -93,7 +93,7 @@ function handleNameChangeAttempts(socket,nickNames,nameUsed){
             if (nameUsed.indexOf(name) == -1){
                 //删除之前的名字
                 const preName = nickNames[socket.id]
-                const preIndex = nameUsed.index(preName)
+                const preIndex = nameUsed.indexOf(preName)
                 //同步nickname
                 nickNames[socket.id] = name
                 delete nameUsed[preIndex]

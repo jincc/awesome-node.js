@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title><%= title %></title>
+</head>
+<body>
+    name:<%= userinfo.name %><br>
+    age:<%= userinfo.age %><br>
+    解析html代码:<br>
+    message:<%= userinfo.message %><br>
+    <br>
+    不解析html代码:<br>
+    message:<%- userinfo.message %><br>
+    <%# i'm description %><br>
+    <% if(userinfo.age > 5){ %>  
+    5+
+    <% }else{%>  
+    5-  
+    <%}%>  
+    <%# <p>测试#####</p> %>
+    <%% hahahhahaha %>
+    <p>我是锻炼</p> 
+    <input type="submit"></input>
+</body>
+</html>

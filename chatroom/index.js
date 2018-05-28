@@ -19,6 +19,7 @@ function sendFile(response,filePath,fileContents){
 }
 //冲缓存里获取文件
 function serveStatic(response,cache,absPath){
+    console.log(absPath)
     if (cache[absPath]){
         sendFile(response,absPath,cache[absPath])
     }else{
@@ -43,9 +44,10 @@ function serveStatic(response,cache,absPath){
 var server = http.createServer((request,response)=>{
     var filePath = null
     if (request.url == '/'){
-        filePath = 'public/index.html'
+        filePath = '/public/index.html'
     }else{
-        filePath = 'public' + request.url
+        if (request.url.endWith(''))
+        filePath =  request.url
     }
     serveStatic(response,CACHES,path.join(__dirname,filePath))
 })
@@ -55,3 +57,8 @@ chatServer.listen(server)
 server.listen(3000,()=>{
     console.log('server start listen 3000')
 })
+
+String.prototype.endWith=function(endStr){
+    var d=this.length-endStr.length;
+    return (d>=0&&this.lastIndexOf(endStr)==d);
+}

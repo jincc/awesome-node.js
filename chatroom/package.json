@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js --exec babel-node --presets es2015,stage-2"
+    "start": "node inspect index.js --exec babel-node --presets es2015,stage-2",
+    "debug1": "nodemon --inspect index.js --exec babel-node --presets es2015,stage-2",
+    "build": "babel libs -d dist --source-maps"
   },
   "author": "",
   "license": "ISC",
