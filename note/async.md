@@ -10,9 +10,26 @@ promise的实现
 https://www.cnblogs.com/dojo-lzz/p/4340897.html
 https://www.jianshu.com/p/473cd754311f
 
+<h3>异步三部曲</h3>
+ 
+![异步三部曲](https://github.com/i5ting/How-to-learn-node-correctly/raw/master/media/14913280187332/Screen%20Shot%202017-04-05%20at%2008.43.08.png)
+
++ Error-first Callback
++ promise
++ async
 
 <h3>概念</h3>
-Promise是抽象异步处理对象以及对其进行各种操作的组件
+Promise是把异步处理对象和处理规则进行规范化，并按照采用统一的接口来编写，而采取规定方法之外的写法都会出错。Promise是抽象异步处理对象以及对其进行各种操作的组件。
+
+<pre>
+ + new
+ + then
+ + catch
+ + resolve
+ + reject
+ + all
+ + race
+</pre>
 <pre>
 var promise = new Promise(function(resolve, reject) {
     // 异步处理
@@ -21,18 +38,23 @@ var promise = new Promise(function(resolve, reject) {
 promise.then(onFulfilled, onRejected)
 </pre>
 <h3>promise states</h3>
-![promise states](http://liubin.org/promises-book/Ch1_WhatsPromises/img/promise-states.png)<br>
-> promise对象的状态，从Pending转换为Fulfilled或Rejected之后， 这个promise对象的状态就不会再发生任何变化。也就是说，Promise与Event等不同，在.then 后执行的函数可以肯定地说只会被调用一次。另外，Fulfilled和Rejected这两个中的任一状态都可以表示为Settled(不变的)
 
-<h3>then</h3>
-![状态流向1](http://liubin.org/promises-book/Ch2_HowToWrite/img/promise-then-catch-flow.png)
-![状态流向2](http://liubin.org/promises-book/Ch2_HowToWrite/img/promise-then-passing-value.png)
+![promise states](http://liubin.org/promises-book/Ch1_WhatsPromises/img/promise-states.png)<br>
+
+> **promise对象的状态，从Pending转换为Fulfilled或Rejected之后， 这个promise对象的状态就不会再发生任何变化。也就是说，Promise与Event等不同，在.then 后执行的函数可以肯定地说只会被调用一次**。
+
+> **同时不管你使用then监听了多少次promise，promise初始化的代码块只会被执行一次。当状态从pending->fulfilled的时候，通知所有then方法回调。这和rx的概念还是不一样的**。
+
+<!--<h3>then</h3>
+
+![状态流向1](http://liubin.org/promises-book/Ch2_HowToWrite/img/promise-then-catch-flow.png)-->
 
 > 每次调用then都会返回一个新创建的promise对象
 
 <h3>Promise.resolve</h3>
 1. new Promise的快捷方式
 2. 它能将Thenable对象(拥有的`then`方法应该和Promise所拥有的`then`方法具有同样的功能和处理过程)转换成Promise实例
+
 <h3>Promise只能使用异步调用方式</h3>
 为了避免同时使用同步、异步调用可能引起的混乱问题，Promise在规范上规定 Promise只能使用异步调用方式 。由于Promise保证了每次调用都是以异步方式进行的，所以我们在实际编码中不需要调用 setTimeout 来自己实现异步调用。
 
@@ -53,43 +75,80 @@ innner
 outer
 20
 </pre>
+> 不要对异步回调函数进行同步调用 
 
-<h3>Promise.all .race</h3>
-Promise.all 在接收到的所有的对象promise都变为 FulFilled 或者 Rejected 状态之后才会继续进行后面的处理
-使用Promise.then同时处理多个异步请求的时候，为了简化main后面的then操作，引入了all
+<h3>promise错误的捕获</h3>
+promise内部如果抛出了错误，外层必须要捕获。下面举一个例子来描述这件事情：
 <pre>
-var request = {
-        comment: function getComment() {
-            return getURL('http://azu.github.io/promises-book/json/comment.json').then(JSON.parse);
-        },
-        people: function getPeople() {
-            return getURL('http://azu.github.io/promises-book/json/people.json').then(JSON.parse);
-        }
-};
-function main(){
-    function recordValue(results,value){
-        results.push(value)
-        return results
-    }
-    //通过使用这种偏函数（Partial Function）的方式就可以减少匿名函数的使用。（如果在函数回调风格的代码能很好的做到函数分离的话，也能减少匿名函数的数量）
-    var pushValue = recordValue.bind(null,[])
-    return request.comment().then(pushValue).then(request.people).then(pushValue)
+function doubleUp(value){
+    return value * 2
+}
+function increment(value){
+    // return value + 1
+    throw new Error('not support')   //1.
+    // return Promise.reject(new Error('not support'))//2.
+}
+var promise = Promise.resolve(1)
+promise
+.then(increment)
+.then(doubleUp)
+.catch(e=>{
+    console.error(e)
+}).then(v=>{
+    console.log(v)
+})
+</pre>
+promise的链式写法，每一次调用方法都会生成一个新的promise，我们上面最后监听的promise实际上是catch error以后的promise。这个promise隐式的返回了undefined。所以上面代码会打印'undefined'.所以当我们在catch error的时候应该返回我们预期的值.这一点很重要.
+
+另外让我们来修改下increment函数，模拟下下载某一个数据接口，返回把下载的数据解析为json.代码如下：
+<pre>
+function increment(value){
+    //async work
+    return new Promise((resolve,reject)=>{
+        setTimeout(()=>{
+            //api net 
+           JSON.parse('NOT JSON')
+        },100)
+    })
 }
 </pre>
-改用all以后:
+使用的方法同上面一样，执行以后你会发现我们这里的catch是捕获不到这个`SyntaxError: Unexpected token N in JSON at position 0`错误的。Node.js里面是无法捕获异步异常的。你试想一下：
 <pre>
-Promise.all([request.comment(), request.people()]).then(values=>{
-    //values
-}).catch(error=>{
-    //error
-});
+try {
+    //async work
+    setTimeout(()=>{
+       JSON.parse('NOT JSON')
+    },100)
+} catch (error) {
+    
+}
 </pre>
-这两个请求是同时开始，异步执行的。当所有请求promise状态完成以后，进入到then回调，values的顺序与入参顺序一样。当有一个发生错误的时候，进入catch代码块，不会进入values
+安装node单线程的执行逻辑，当我们try catch的时候，实际上这时候错误还没发生，而真正发生是在100ms以后，这就能解释为什么上面的catch为什么不能捕获这个异常了.正确的写法应该如下：
+<pre>
+function increment(value){
+    return new Promise((resolve,reject)=>{
+        setTimeout(()=>{
+            try {
+                JSON.parse('NOT JSON')
+            } catch (error) {
+                resolve(20)
+            }
+        },100)
+    })
+}
+</pre>
 
-<h4>race</h4>
-与之相对的是 Promise.race 只要有一个promise对象进入 FulFilled 或者 Rejected 状态的话，就会继续进行后面的处理。<br>
-`Promise.race` 在第一个promise对象变为Fulfilled之后，并不会取消其他promise对象的执行。
-> 在 ES6 Promises 规范中，也没有取消（中断）promise对象执行的概念，我们必须要确保promise最终进入resolve or reject状态之一。也就是说Promise并不适用于 状态 可能会固定不变的处理。
+<h3>几种场景</h3>
++ 串行任务,task1.then(task2).then(task3)
++ 并行任务,完成以后回调,使用Promise.all([task1,task2,task3])
++ 为任务设置timeout,Promise.race([task1,timeoutpromise])
+
+> Promise.all 所有的task是同时开始，异步执行的。当所有请求promise状态完成以后，进入到then回调，values的顺序与入参顺序一样。当有一个发生错误的时候，进入catch代码块，不会进入values
+
+> 在 ES6 Promises 规范中，没有取消（中断）promise对象执行的概念，我们必须要确保promise最终进入resolve or reject状态之一。也就是说Promise并不适用于 状态 可能会变的处理
+
+> `Promise.race` 在第一个promise对象变为Fulfilled之后，并不会取消其他promise对象的执行。
+
 
 <h3>then or catch?</h3>
 <pre>
@@ -115,6 +174,29 @@ goodMain(function(){
 </pre>
 > .then 方法中的onRejected参数所指定的回调函数，实际上针对的是其promise对象或者之前的promise对象，而不是针对 .then 方法里面指定的第一个参数，即onFulfilled所指向的对象，这也是 then 和 catch 表现不同的原因
 >> 错误捕获请使用`catch`
+
+<h4>done</h4>
+如果编码时忘记了处理该异常，一旦出现异常，那么查找异常发生的源头将会变得非常棘手，这就是使用promise需要注意的一面。虽然抛出了异常，但是没有对该异常进行处理.所以在有可能产生异常的promise后面加上catch吧.或者泳道我们的done.
+<pre>
+if (typeof Promise.prototype.done === 'undefined'){
+    Promise.prototype.done = function(onFulfilled,onRejected){
+        this.then(onFulfilled,onRejected).catch(function (err){
+            setTimeout(function(){
+                throw err
+            },0)
+        })
+    }
+}
+
+var promise = Promise.resolve()
+promise.done(()=>{
+    JSON.parse('xxxx')
+})
+</pre>
+> 这里我们用了catch方法来捕获之前的错误，然后通过异步把这个错误抛到外层去。因为node里面异步是不能捕获这个错误的.
+
+
+
 
 <h3>thenable</h3>
  Thenable风格表现为位于回调和Promise风格中间的一种状态，作为类库的公开API有点不太成熟，所以并不常见。
