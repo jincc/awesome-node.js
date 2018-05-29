@@ -115,3 +115,19 @@ goodMain(function(){
 </pre>
 > .then 方法中的onRejected参数所指定的回调函数，实际上针对的是其promise对象或者之前的promise对象，而不是针对 .then 方法里面指定的第一个参数，即onFulfilled所指向的对象，这也是 then 和 catch 表现不同的原因
 >> 错误捕获请使用`catch`
+
+<h3>thenable</h3>
+ Thenable风格表现为位于回调和Promise风格中间的一种状态，作为类库的公开API有点不太成熟，所以并不常见。
+恐怕最可能被使用的是在 Promise类库 之间进行相互转换了。
+
+<h3>Deferred</h3>
+简单来说，Deferred和Promise具有如下的关系。
++ Deferred 拥有 Promise
++ Deferred 具备对 Promise的状态进行操作的特权方法
+
+![Deferred](http://liubin.org/promises-book/Ch4_AdvancedPromises/img/deferred-and-promise.png)
+
+如果说Promise是用来对值进行抽象的话，Deferred则是对处理还没有结束的状态或操作进行抽象化的对象，我们也可以从这一层的区别来理解一下这两者之间的差异。换句话说，Promise代表了一个对象，这个对象的状态现在还不确定，但是未来一个时间点它的状态要么变为正常值（FulFilled），要么变为异常值（Rejected）；而Deferred对象表示了一个处理还没有结束的这种事实，在它的处理结束的时候，可以通过Promise来取得处理结果。
+
+
+
