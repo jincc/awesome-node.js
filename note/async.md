@@ -1,25 +1,22 @@
-https://www.cnblogs.com/kazetotori/p/6043983.html
-http://www.ruanyifeng.com/blog/2015/05/async.html
-
-promise:
-Node.js最新技术栈之Promise篇 https://cnodejs.org/topic/560dbc826a1ed28204a1e7de
-理解 Promise 的工作原理 https://cnodejs.org/topic/569c8226adf526da2aeb23fd
-Promise 迷你书 http://liubin.github.io/promises-book/
-
-promise的实现
-https://www.cnblogs.com/dojo-lzz/p/4340897.html
-https://www.jianshu.com/p/473cd754311f
-
 <h3>异步三部曲</h3>
  
-![异步三部曲](https://github.com/i5ting/How-to-learn-node-correctly/raw/master/media/14913280187332/Screen%20Shot%202017-04-05%20at%2008.43.08.png)
+![异步三部曲](https://dn-cnode.qbox.me/FgKu20kvFqHrkgpjbQxXkV1DmrG1)
 
 + Error-first Callback
 + promise
 + async
 
 <h3>概念</h3>
-Promise是把异步处理对象和处理规则进行规范化，并按照采用统一的接口来编写，而采取规定方法之外的写法都会出错。Promise是抽象异步处理对象以及对其进行各种操作的组件。
+
+针对callback的写法，我们想要做到下面几点:
++ 链式写法,每个操作独立
++ 上个操作输出作为下个函数输入
++ 能捕获异常
++ 能在函数里面控制流程(resolve,reject)
+
+[Promise/A+]](https://promisesaplus.com/)
+
+Promise是一个包含了兼容promise规范then方法的对象或函数..代表一个目前还不可用，但是在未来的某个时间点可以被解析的值。Promises 不是一种解决具体问题的算法，而已一种更好的代码组织模式。接受新的组织模式同时，也逐渐以全新的视角来理解异步调用
 
 <pre>
  + new
@@ -195,9 +192,6 @@ promise.done(()=>{
 </pre>
 > 这里我们用了catch方法来捕获之前的错误，然后通过异步把这个错误抛到外层去。因为node里面异步是不能捕获这个错误的.
 
-
-
-
 <h3>thenable</h3>
  Thenable风格表现为位于回调和Promise风格中间的一种状态，作为类库的公开API有点不太成熟，所以并不常见。
 恐怕最可能被使用的是在 Promise类库 之间进行相互转换了。
@@ -207,9 +201,59 @@ promise.done(()=>{
 + Deferred 拥有 Promise
 + Deferred 具备对 Promise的状态进行操作的特权方法
 
-![Deferred](http://liubin.org/promises-book/Ch4_AdvancedPromises/img/deferred-and-promise.png)
+<h3>四个要点</h3>
 
-如果说Promise是用来对值进行抽象的话，Deferred则是对处理还没有结束的状态或操作进行抽象化的对象，我们也可以从这一层的区别来理解一下这两者之间的差异。换句话说，Promise代表了一个对象，这个对象的状态现在还不确定，但是未来一个时间点它的状态要么变为正常值（FulFilled），要么变为异常值（Rejected）；而Deferred对象表示了一个处理还没有结束的这种事实，在它的处理结束的时候，可以通过Promise来取得处理结果。
++ 异步操作的最终结果，尽可能每一个异步操作都是独立操作单元
++ 与Promise最主要的交互方法是通过将函数传入它的then方法（thenable）
++ 捕获异常catch error
++ 根据reject和resolve重塑流程
+
+<h3>Promise的实现</h3>
+[taxi](https://github.com/William17/taxi#new-promise)
+
+<h3>async await</h3>
+promise只是解决了回调嵌套的问题，并没有解决回调本身，我们看到的代码依然是用回调阻止的。于是引入了async/await
 
 
+async 函数就是 Generator 函数的语法糖。
 
++ 内置执行器.async 函数的执行，与普通函数一模一样，只要一行。
++ 更好的语义.async 表示函数里有异步操作，await 表示紧跟在后面的表达式需要等待结果。
++ async函数将返回一个Promise对象.可以使用 then 方法添加回调函数。
++ await关键字后跟一个promise对象，函数执行到await后会退出该函数，直到事件轮询检查到Promise有了状态resolve或reject 才重新执行这个函数后面的内容。
++ await 命令后面的 Promise 对象，运行结果可能是 rejected，所以最好把 await 命令放在 try...catch 代码块中。
+
+
+实例代码：
+<pre>
+function timeout(ms) {
+    return new Promise((resolve) => {
+      setTimeout(()=>{
+          resolve(ms)
+      }, ms);
+    });
+}
+  
+async function asyncPrint(value, ms) {
+    await timeout(ms);
+    console.log(value)
+}
+  
+asyncPrint('hello world', 50);
+console.log('start')
+
+async function doMoreAsync(){
+var times = [1000,2000,3000]
+times = times.map(timeout)
+let results = await Promise.all(times)
+console.log(results)
+}
+doMoreAsync()
+</pre>
+<pre>
+start
+hello world
+[1000,2000,3000]
+</pre>
+
+> 我们可以看出async函数实际上也是处理promise。所以掌握promise是很重要的一件事情。

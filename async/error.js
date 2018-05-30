@@ -30,9 +30,6 @@ function doTask(){
 timeout(doTask(),1000).then(v=>{
     console.log('finished')
 }).catch(e=>{
-    if (typeof e === 'TimeoutError'){
-        console.log('is TimeoutError')
-    }
     console.log(e instanceof TimeoutError)
 })
 

@@ -53,4 +53,15 @@ process.on('uncaughtException', function(err){
   process.exit(1);
 });
 </pre>
- 
+<h3>异步</h3>
+<h4>串行话流程控制</h4>
+<s>看Node in action第75页</s><br>
+<a href='/Users/junl/Documents/Github/awesome-node.js/Cap3编程基础/random_story'>demo</a><br>
+
+> 串行话流程控制的本质是在需要时让回调进场。把所以任务放进一个数组里面，让每个任务执行完成以后调取下一个继续执行。
+
+<h4>异步流程控制</h4>
+<s>看Node in action第77页</s>
+<a href='/Users/junl/Documents/Github/awesome-node.js/Cap3编程基础/word_count'>demo</a><br>
+
+> 用一个记步数来记录当前以及完成的任务数,然后比较

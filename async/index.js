@@ -11,7 +11,6 @@ function asyncFuntion(){
 
 const promise = asyncFuntion()
 
-
 promise.then(v=>{
     console.log(v)
 }).catch(e=>{
