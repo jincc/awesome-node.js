@@ -1,3 +1,4 @@
+https://cnodejs.org/topic/57d68794cb6f605d360105bf
 <h3>异步三部曲</h3>
  
 ![异步三部曲](https://dn-cnode.qbox.me/FgKu20kvFqHrkgpjbQxXkV1DmrG1)
@@ -9,6 +10,7 @@
 <h3>概念</h3>
 
 针对callback的写法，我们想要做到下面几点:
+
 + 链式写法,每个操作独立
 + 上个操作输出作为下个函数输入
 + 能捕获异常
@@ -136,6 +138,7 @@ function increment(value){
 </pre>
 
 <h3>几种场景</h3>
+
 + 串行任务,task1.then(task2).then(task3)
 + 并行任务,完成以后回调,使用Promise.all([task1,task2,task3])
 + 为任务设置timeout,Promise.race([task1,timeoutpromise])
@@ -169,10 +172,14 @@ goodMain(function(){
     console.log("GOOD");
 });
 </pre>
-> .then 方法中的onRejected参数所指定的回调函数，实际上针对的是其promise对象或者之前的promise对象，而不是针对 .then 方法里面指定的第一个参数，即onFulfilled所指向的对象，这也是 then 和 catch 表现不同的原因
->> 错误捕获请使用`catch`
+<br>
+
+> then 方法中的onRejected参数所指定的回调函数，实际上针对的是其promise对象或者之前的promise对象，而不是针对 .then 方法里面指定的第一个参数，即onFulfilled所指向的对象，这也是 then 和 catch 表现不同的原因
+
+> 错误捕获请使用`catch`
 
 <h4>done</h4>
+
 如果编码时忘记了处理该异常，一旦出现异常，那么查找异常发生的源头将会变得非常棘手，这就是使用promise需要注意的一面。虽然抛出了异常，但是没有对该异常进行处理.所以在有可能产生异常的promise后面加上catch吧.或者泳道我们的done.
 <pre>
 if (typeof Promise.prototype.done === 'undefined'){
@@ -190,6 +197,7 @@ promise.done(()=>{
     JSON.parse('xxxx')
 })
 </pre>
+
 > 这里我们用了catch方法来捕获之前的错误，然后通过异步把这个错误抛到外层去。因为node里面异步是不能捕获这个错误的.
 
 <h3>thenable</h3>
@@ -233,15 +241,12 @@ function timeout(ms) {
       }, ms);
     });
 }
-  
 async function asyncPrint(value, ms) {
     await timeout(ms);
     console.log(value)
-}
-  
+} 
 asyncPrint('hello world', 50);
 console.log('start')
-
 async function doMoreAsync(){
 var times = [1000,2000,3000]
 times = times.map(timeout)
@@ -257,3 +262,82 @@ hello world
 </pre>
 
 > 我们可以看出async函数实际上也是处理promise。所以掌握promise是很重要的一件事情。
+
+<h3>异步协作</h3>
+我们知道，JS引擎对时间没有天生的感觉，反而是一个任意JS代码段的按需执行环境。是它周围的环境在不停地安排“事件”（JS代码的执行）。它的伪代码如下:
+
+<pre>
+// `eventLoop`是一个像队列一样的数组（先进先出）
+var eventLoop = [ ];
+var event;
+// “永远”执行
+while (true) {
+	// 执行一个"tick"
+	if (eventLoop.length > 0) {
+		// 在队列中取得下一个事件
+		event = eventLoop.shift();
+
+		// 现在执行下一个事件
+		try {
+			event();
+		}
+		catch (err) {
+			reportError(err);
+		}
+	}
+}
+</pre>
+
+我们的回调函数将会在某一个时刻被加入到eventloop时间里面，然后在每一次迭代(tick)时，依次出队列，然后顺序执行.(JS是单线程)。
+
+> setTimeout(..)不会将你的回调放在事件轮询队列上。它设置一个定时器；当这个定时器超时的时候，环境才会把你的回调放进事件轮询，这样在某个未来的tick中它将会被取出执行。
+
+我们来试想一下这样的场景:
+<pre>
+var res = [];
+// `response(..)`从Ajax调用收到一个结果数组
+function response(data) {
+	// 连接到既存的`res`数组上
+	res = res.concat(
+		// 制造一个新的变形过的数组，所有的`data`值都翻倍
+		data.map( function(val){
+			return val * 2;
+		} )
+	);
+}
+// ajax(..) 是某个包中任意的Ajax函数
+ajax( "http://some.url.1", response );
+ajax( "http://some.url.2", response );
+</pre>
+
+根据上面的分析，最终res=[...url1s,...url2s]或者[...url2s,url1s].如果返回的数据量很大的时候，可能会阻塞我们的程序。这个情况，我们可以异步分批来处理:
+
+<pre>
+var res = [];
+// `response(..)`从Ajax调用收到一个结果数组
+function response(data) {
+	// 我们一次只处理1000件
+	var chunk = data.splice( 0, 1000 );
+	// 连接到既存的`res`数组上
+	res = res.concat(
+		// 制造一个新的变形过的数组，所有的`data`值都翻倍
+		chunk.map( function(val){
+			return val * 2;
+		} )
+	);
+	// 还有东西要处理吗？
+	if (data.length > 0) {
+		// 异步规划下一个批处理
+		setTimeout( function(){
+			response( data );
+		}, 0 );
+	}
+}
+// ajax(..) 是某个包中任意的Ajax函数
+ajax( "http://some.url.1", response );
+ajax( "http://some.url.2", response );
+</pre>
+
+我们以每次最大1000件作为一个块儿处理数据。这样，我们保证每个“进程”都是短时间运行的，即便这意味着会有许多后续的“进程”，在事件轮询队列上的穿插将会给我们一个响应性（性能）强得多的网站/应用程序。
+
+当然，我们没有对任何这些“进程”的顺序进行互动协调，所以在res中的结果的顺序是不可预知的。如果要求顺序，你需要使用我们之前讨论的互动技术，或者在本书后续章节中介绍的其他技术。
