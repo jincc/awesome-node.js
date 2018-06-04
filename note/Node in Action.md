@@ -19,7 +19,7 @@ http.createServer((req,res)=>{
 }).listen(3000)
 </pre>
 
-<h3>char rooms</h3>
+<h3>chat rooms</h3>
 
 访问内存(RAM)要比访问文件系统快得多，所以Node程序通常会把常用的数据缓存到内存里
 
@@ -65,3 +65,64 @@ process.on('uncaughtException', function(err){
 <a href='/Users/junl/Documents/Github/awesome-node.js/Cap3编程基础/word_count'>demo</a><br>
 
 > 用一个记步数来记录当前以及完成的任务数,然后比较
+
+<h3>构建Node web程序</h3>
+调用setHeader(),statusCode等api时，需要是在第一次调用res.write()或res.end()之前就行。在响应主体的第一部分写入之后，Node会刷新已经设定好的HTTP头。
+<pre>
+var server = http.createServer((req,res)=>{
+    console.log('request')
+    var body = 'hello world'
+    //设置响应头，添加和移除响应头的顺序可以随意，但一定要在调用res.write()或 res.end()之前。在 响应主体的第一部分写入之后，Node会刷新已经设定好的HTTP头。
+    res.setHeader('Content-Length',body.length)
+    res.setHeader('Content-Type','text/plain')
+    //状态码
+    res.statusCode = 200
+    res.write('hello world')
+    res.end()
+    console.log(res)
+})
+server.listen(3000)
+</pre>
+
+<h3>构建RESTful web服务</h3>
+
+<a href='/Users/junl/Documents/Github/awesome-node.js/Cap4构建web程序/restful.js'>代码地址</a><br>
+REST服务指定了GET、POST、PUT和DELETE，分别跟由URL指定的资源的获取、创建、更新和移除相对应
++ GET 获取
++ POST 创建
++ PUT 更新
++ DELETE 删除
+
+<h4>设定Content-Length头</h4>
+
+<s>为了提高响应速度，如果可能的话，应该在响应中带着Content-Length域一起发送</s>。设定Content-Length域会隐含禁用Node的块编码，因为要传输的数据更少 所以能提升性能。Content-Length的值应该是<s>字节长度</s>，不是字符长度，并且如果字符串中有多字节字符，两者的长度是不一样的。为了规避这 个问题，Node提供了一个<s>Buffer.byteLength()</s>方法
+
+<h3>静态文件服务</h3>
+<h4>用pipe优化代码</h4>
+READSTREAM继承eventEmitter，拥有`data`和`end`事件,一般我们会在data里面凭借数据流，end里面发送或者处理数据，这样效率是很低效的。使用pipe管道,开发人员可以每收到一块数据就开始处理，而不用等所有数据都到全了再做处理.
+
+所有ReadableStream都能接入任何一个WritableStream。比如HTTP请求(req)对象就是ReadableStream，你可以让其中的内容流动到文件中:
+req.pipe(fs.createWriteStream('./req-body.txt'))
+
+<h4>处理服务器错误</h4>
+当我们在请求某些不存在的文件时,如果没有设置监听器，error事件会被抛出。也就是说如果你不监听这些错误，那它们 就会搞垮你的服务器。
+<pre>
+var server = http.createServer((req,res)=>{
+    var pathname = url.parse(req.url).pathname
+    //req
+    req.setEncoding('utf-8')
+    var readStream = fs.createReadStream(path.join(__dirname,pathname))
+    readStream.pipe(res)
+    readStream.on('error',(err)=>{
+        console.log(`读取文件失败`,err)
+    })
+})
+</pre>
+<h3>从表单中接受用户输入</h3>
+
+表单提交请求带的Content-Type值通常有两种:
++ application/x-www-form-urlencoded:这是HTML表单的默认值;
++ multipart/form-data:在表单中含有文件或非ASCII或二进制数据时使用。
+
+<h3>Connect</h3>
+中间件组件是一个函数，它拦截HTTP服务器提供的请求和响应对象，执行逻辑，然后或者结束响应，或者把它传递给下一个中间件组件

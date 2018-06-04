@@ -16,7 +16,7 @@
             "type": "node",
             "request": "launch",
             "name": "启动程序",
-            "program": "${workspaceFolder}/chatroom/index.js"
+            "program": "${workspaceFolder}/Cap4构建web程序/index.js"
         }
     ]
 }

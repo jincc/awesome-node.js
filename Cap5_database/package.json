@@ -1,0 +1,15 @@
+{
+  "name": "cap5_database",
+  "version": "1.0.0",
+  "description": "第五章 存储Node程序的数据",
+  "main": "file.js",
+  "dependencies": {
+    "mysql": "^2.15.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jincc",
+  "license": "ISC"
+}

@@ -1,4 +1,3 @@
-https://cnodejs.org/topic/57d68794cb6f605d360105bf
 <h3>异步三部曲</h3>
  
 ![异步三部曲](https://dn-cnode.qbox.me/FgKu20kvFqHrkgpjbQxXkV1DmrG1)
@@ -7,6 +6,12 @@ https://cnodejs.org/topic/57d68794cb6f605d360105bf
 + promise
 + async
 
+<h3>Callback地狱</h3>
+
+使用回调函数会带来几个问题，第一个是嵌套太深，形成回调地狱,这个问题很常见，其他编程问题也会遇到。还是一个是信任问题.回调函数在处理某些逻辑的时候并不会按照我们预期的逻辑来执行，他不会给我们提供任何协助，我们不得不自己构建所有的装置，而且这通常最终成为许多我们要在每个异步回调中重复的模板/负担。<br>具体章节可以浏览:<br>
+[五个回调的故事](https://github.com/getify/You-Dont-Know-JS/blob/1ed-zh-CN/async%20%26%20performance/ch2.md#%E4%BA%94%E4%B8%AA%E5%9B%9E%E8%B0%83%E7%9A%84%E6%95%85%E4%BA%8B)
+<br>
+[互动](https://github.com/getify/You-Dont-Know-JS/blob/1ed-zh-CN/async%20%26%20performance/ch1.md#%E4%BA%92%E5%8A%A8)
 <h3>概念</h3>
 
 针对callback的写法，我们想要做到下面几点:
@@ -16,7 +21,7 @@ https://cnodejs.org/topic/57d68794cb6f605d360105bf
 + 能捕获异常
 + 能在函数里面控制流程(resolve,reject)
 
-[Promise/A+]](https://promisesaplus.com/)
+[Promise/A+](https://promisesaplus.com/)
 
 Promise是一个包含了兼容promise规范then方法的对象或函数..代表一个目前还不可用，但是在未来的某个时间点可以被解析的值。Promises 不是一种解决具体问题的算法，而已一种更好的代码组织模式。接受新的组织模式同时，也逐渐以全新的视角来理解异步调用
 
@@ -36,9 +41,12 @@ var promise = new Promise(function(resolve, reject) {
 });
 promise.then(onFulfilled, onRejected)
 </pre>
+
 <h3>promise states</h3>
 
-![promise states](http://liubin.org/promises-book/Ch1_WhatsPromises/img/promise-states.png)<br>
+
+![promise states](http://liubin.org/promises-book/Ch1_WhatsPromises/img/promise-states.png)
+<br>
 
 > **promise对象的状态，从Pending转换为Fulfilled或Rejected之后， 这个promise对象的状态就不会再发生任何变化。也就是说，Promise与Event等不同，在.then 后执行的函数可以肯定地说只会被调用一次**。
 
@@ -50,9 +58,6 @@ promise.then(onFulfilled, onRejected)
 
 > 每次调用then都会返回一个新创建的promise对象
 
-<h3>Promise.resolve</h3>
-1. new Promise的快捷方式
-2. 它能将Thenable对象(拥有的`then`方法应该和Promise所拥有的`then`方法具有同样的功能和处理过程)转换成Promise实例
 
 <h3>Promise只能使用异步调用方式</h3>
 为了避免同时使用同步、异步调用可能引起的混乱问题，Promise在规范上规定 Promise只能使用异步调用方式 。由于Promise保证了每次调用都是以异步方式进行的，所以我们在实际编码中不需要调用 setTimeout 来自己实现异步调用。
@@ -203,6 +208,21 @@ promise.done(()=>{
 <h3>thenable</h3>
  Thenable风格表现为位于回调和Promise风格中间的一种状态，作为类库的公开API有点不太成熟，所以并不常见。
 恐怕最可能被使用的是在 Promise类库 之间进行相互转换了。
+<pre>
+if (
+	p !== null &&
+	(
+		typeof p === "object" ||
+		typeof p === "function"
+	) &&
+	typeof p.then === "function"
+) {
+	// 认为它是一个thenable!
+}
+else {
+	// 不是一个thenable
+}
+</pre>
 
 <h3>Deferred</h3>
 简单来说，Deferred和Promise具有如下的关系。
