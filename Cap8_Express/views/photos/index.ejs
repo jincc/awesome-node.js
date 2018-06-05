@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/photos.css"></link>
+    <script>play()</script>
+</head>
+<body>
+    <h1><%= title %></h1>
+    <p>Express stock photo application.</p>
+    <div id ='photos'>
+        <% photos.forEach(function(photo){ %>
+            <div id='photo'>
+                <p><%= photo.name %></p>
+                <img src='<%= photo.path %>'></img>
+            </div>
+        <%})%>
+    </div>
+</body>
+</html>
