@@ -126,3 +126,10 @@ var server = http.createServer((req,res)=>{
 
 <h3>Connect</h3>
 中间件组件是一个函数，它拦截HTTP服务器提供的请求和响应对象，执行逻辑，然后或者结束响应，或者把它传递给下一个中间件组件
+
+<h3>express</h3>
+Express构建在Connect之上，致力于打造出更小的，模块化更高的功能实现.
+
+要在UNIX中设置环境变量，可以用这个命令:
+$ NODE_ENV=production node app 在Windows中用这个:
+这些环境变量会出现在你程序里的process.env对象中。
