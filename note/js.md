@@ -123,7 +123,7 @@ var num = 25;
 num = +num; //任然是25
 var s3 = '1.1'
 s3 = +s3 //1.1
-</pre>
+</pre><br>
 
 + 按位非(NOT) ~操作数负值-1
 + 按位与(AND) &按位与操作只在两个数值的对应位都是 1 时才返回 1，任何一位是 0，结果都是 0
@@ -166,6 +166,88 @@ function doAdd(num1, num2) {
     alert(arguments[0] + num2);
 }
 </pre>
-每次执行这个 doAdd()函数都会重写第二个参数，将第二个参数的值修改为 10。因为 arguments 对象中的值会自动反映到对应的命名参数，所以修改 arguments[1]，也就修改了 num2，结果它们的 值都会变成 10。不过，这并不是说读取这两个值会访问相同的内存空间;它们的内存空间是独立的，但 它们的值会同步。另外还要记住，如果只传入了一个参数，那么为 arguments[1]设置的值不会反应到 命名参数中。这是因为 arguments 对象的长度是由传入的参数个数决定的，不是由定义函数时的命名 参数的个数决定的。
-
+每次执行这个 doAdd()函数都会重写第二个参数，将第二个参数的值修改为 10。因为 arguments 对象中的值会自动反映到对应的命名参数，所以修改 arguments[1]，也就修改了 num2，结果它们的 值都会变成 10。不过，这并不是说读取这两个值会访问相同的内存空间;它们的内存空间是独立的，但 它们的值会同步。另外还要记住，如果只传入了一个参数，那么为 arguments[1]设置的值不会反应到 命名参数中。这是因为 arguments 对象的长度是由传入的参数个数决定的，不是由定义函数时的命名 参数的个数决定的。<br>
 > ECMAScript 中的所有参数传递的都是值，不可能通过引用传递参数。
+
+<h3>变量的类型：值类型和引用类型</h3>
+
++ 只有引用类型能够新增属性，方法
++ 所有函数的参数都是按值传递的.包括值类型
+
+<h3>Array</h3>
+ECMAScript 数组的每一项可以保存任何类型的数据。也 就是说，可以用数组的第一个位置来保存字符串，用第二位置来保存数值，用第三个位置来保存对象.<br>
+length属性是可读写的，通过设置这个属性可以从数组的末尾移除或想数组中添加新项.<br>
+<pre>
+var array = []
+array[0] = '1'
+array[1] = 2
+array[2] = {}
+console.log(array)//[ '1', 2, {} ]
+array.length = 1
+console.log(array)//[ '1' ]
+array.length = 10
+console.log(array)//[ '1', <9 empty items> ]
+</pre>
+常用api:<br>
+<pre>
+//是否是数组
+if (value instanceof Array){
+}
+//判断是否是数组
+if (Array.isArray(value)){ //对数组执行某些操作
+}
+array.toString()//返回数组中每个字符串拼接起来的数组.
+array.join(',')
+//栈操作
+array.push(1,2,3)
+array.pop()
+//队列操作
+var item = array.shift()//弹出第一项，并返回
+array.unshift(1,2,3)//从前面插入两项
+//重排序
+array.reverse()//翻转数组
+array.sort(fn?)//默认安装字符串排序,fn是可选代码
+array.concat(1,[1,1])//先创建当前数组的拷贝，然后拼接
+array.slice(from,to)//返回一个新数组[from...to],不会影响原始数组
+//在数组中部修改
+/**
+    * Removes elements from an array and, if necessary, inserts new elements in their place, returning the deleted elements.
+    * @param start The zero-based location in the array from which to start removing elements.
+    * @param deleteCount The number of elements to remove.
+    * @param items Elements to insert into the array in place of the deleted elements.
+    */
+splice(start: number, deleteCount: number, ...items: T[]): T[];
+//位置方法
+array.indexOf(obj,fromIndex?)
+array.lastIndexOf(obj,fromIndex?)
+//迭代方法
+ every():对数组中的每一项运行给定函数，如果该函数对每一项都返回 true，则返回 true。  filter():对数组中的每一项运行给定函数，返回该函数会返回 true 的项组成的数组。
+ forEach():对数组中的每一项运行给定函数。这个方法没有返回值。
+ map():对数组中的每一项运行给定函数，返回每次函数调用的结果组成的数组。
+ some():对数组中的每一项运行给定函数，如果该函数对任一项返回 true，则返回 true。
+//归并方法
+reduce()
+reduceRight()
+</pre>
+
+<h3>Date类型</h3>
+<pre>
+//获取该日期的毫秒数
+Date.parse("May 25, 2004")
+Date.UTC(2005, 4, 5, 17, 55, 55)//日期和时间都是基于本地失去而非GMT来创建的
+var someDate = new Date(Date.parse("May 25, 2004"));
+var allFives = new Date(Date.UTC(2005, 4, 5, 17, 55, 55)); 
+//简写
+var someDate = new Date("May 25, 2004");
+var allFives = new Date(2005, 4, 5, 17, 55, 55);
+//取得当前时间毫秒
+var start = Date.now();
+//日期的比较
+date1 < date2
+//符号化
+ toDateString()——以特定于实现的格式显示星期几、月、日和年;
+ toTimeString()——以特定于实现的格式显示时、分、秒和时区; 10  toLocaleDateString()——以特定于地区的格式显示星期几、月、日和年;
+ toLocaleTimeString()——以特定于实现的格式显示时、分、秒;
+ toUTCString()——以特定于实现的格式完整的 UTC 日期。
+</pre>
+
