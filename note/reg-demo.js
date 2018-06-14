@@ -91,11 +91,33 @@ var re = /one\b/
 alert(re.test(str))
 alert(re.test(str2))
 
+//找重复项最多的字符个数
 //\a表示重复的某个子项 ,比如：
 //\1 重复的第一个子项
 //\2 重复的第二个子项
 var str = 'asssssssjdsskkmooobbbaa78'
 str = str.split('').sort().join('')
 var re = /(\w)\1+/g
+var index = 0
+var value = null
+str.replace(re,($0,$1)=>{
+    // alert($1)
+    if(index < $0.length){
+        index = $0.length
+        value = $1
+    }
+})
+console.log('字符串中做多的字符'+ value)
 
-console.log(str.match(re))
+
+//判断是不是QQ号
+
+var qq = '12347h9'
+var re = /^[1-9]\d{4,11}$/g
+console.log('是否是qq:'+re.test(qq))
+
+//去掉前后空格
+var str = ' he llo '
+var re = /^\s+|\s+$/g
+str = str.replace(re,'')
+console.log('替换空格后:',str)
