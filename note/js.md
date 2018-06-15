@@ -263,3 +263,42 @@ date1 < date2
 
 
 > 所以，管理全局变量最好的方式就是一旦数据不再有用，最好通过将其值设置为 null 来释放其引用
+
+<h3>基本包装类型</h3>
+为了操作基本类型值，JS还提供了3个特殊类型的引用类型：Boolean,Number,String.每当我们读取一个基本类型的时候，后台都会创建一个对应的包装类型的对象，从而让我们能够调用一些方法来操作这些数据.<br>
+<pre>
+ var s1 = "some text";
+ var s2 = s1.substring(2);
+</pre>
+当我们调用第二行代码的时候。而在读取模式中访问字符串时，后台都会自动完成下列处理:
+<pre>
+var s1 = new String("some text");
+var s2 = s1.substring(2);
+s1 = null;
+</pre>
+基本类型是不具备方法属性的，通过这样的手段，我们就可以在基本类型上使用方法来操作他们.要注意的是,使用 new 调用基本包装类型的构造函数，与直接调用同名的转型函数是不一样的。 例如:
+<pre>
+var value = "25";
+var number = Number(value); //转型函数 
+alert(typeof number); //"number"
+var obj = new Number(value); 
+//构造函数 alert(typeof obj); //"object"
+</pre>
+
+> 尽管我们不建议显式地创建基本包装类型的对象，但它们操作基本类型值的能力还是相当重要的。
+而每个基本包装类型都提供了操作相应值的便捷方法。
+
+<h3>单体内置对象</h3>
+<h4>global对象</h4>
+Global 对象在某种意义上是作为一个终极的“兜底儿对象” 来定义的。换句话说，不属于任何其他对象的属性和方法，最终都是它的属性和方法。事实上，没有全局变量或全局函数;所有在全局作用域中定义的属性和函数，都是 Global 对象的属性<br>
+<pre>
+var uri = "http://www.wrox.com/illegal value.htm#start";
+console.log(encodeURI(uri))//不会对本身属于URI的特殊字符进行编码
+console.log(encodeURIComponent(uri))//会使用对应的编码替换所有非字母数字字符
+</pre>
+encodeURI不会对本身属于URI的特殊字符进行编码,比如冒号、正斜杠、 问号和井字号等.而encodeURIComponent会用对应的编码替换所有非字母数字字符.一般来说，我们使用 encodeURIComponent()方法的时候要比使用 encodeURI()更多，因为在实践中更常见的是对查询字符串参数而不是对基础 URI 进行编码。与之相对的还有encodeURIComponent和encodeURI。
+<pre>
+ var msg = "hello world";
+eval("alert(msg)");    //"hello world"
+</pre>
+eval()方法他会将传入的字符串参数当做时间的ECMAScript语句来解析,然后把执行结果插入到原位置.通过 eval()执行的代码被认为是包含该次调用的执行环境的一部分， 因此被执行的代码具有与该执行环境相同的作用域链
