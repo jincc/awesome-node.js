@@ -264,41 +264,135 @@ date1 < date2
 
 > 所以，管理全局变量最好的方式就是一旦数据不再有用，最好通过将其值设置为 null 来释放其引用
 
-<h3>基本包装类型</h3>
-为了操作基本类型值，JS还提供了3个特殊类型的引用类型：Boolean,Number,String.每当我们读取一个基本类型的时候，后台都会创建一个对应的包装类型的对象，从而让我们能够调用一些方法来操作这些数据.<br>
+
+<h3>Function类型</h3>
+函数实际上是对象，每个函数都是Function类的实例.而且都与其他引用类型一样具有属性和方法。<s>函数名实际上就是指向函数实例的指针，这也就很好理解为什么js里面没有函数重载了</s>
 <pre>
- var s1 = "some text";
- var s2 = s1.substring(2);
+function addSomeNumber(num){
+    return num + 100;
+}
+function addSomeNumber(num) {
+    return num + 200;
+}
+var result = addSomeNumber(100); //300
 </pre>
-当我们调用第二行代码的时候。而在读取模式中访问字符串时，后台都会自动完成下列处理:
+这个例子中声明了两个同名函数，而结果则是后面的函数覆盖了前面的函数。以上代码实际 上与下面的代码没有什么区别:
 <pre>
-var s1 = new String("some text");
-var s2 = s1.substring(2);
-s1 = null;
-</pre>
-基本类型是不具备方法属性的，通过这样的手段，我们就可以在基本类型上使用方法来操作他们.要注意的是,使用 new 调用基本包装类型的构造函数，与直接调用同名的转型函数是不一样的。 例如:
-<pre>
-var value = "25";
-var number = Number(value); //转型函数 
-alert(typeof number); //"number"
-var obj = new Number(value); 
-//构造函数 alert(typeof obj); //"object"
+var addSomeNumber = function (num){
+    return num + 100;
+};
+addSomeNumber = function (num) { 
+      return num + 200;
+};
 </pre>
 
-> 尽管我们不建议显式地创建基本包装类型的对象，但它们操作基本类型值的能力还是相当重要的。
-而每个基本包装类型都提供了操作相应值的便捷方法。
+> 两种写法的区别：第一种写法，会存在函数声明提升的过程，js引擎会把函数声明提升到顶部.
+<h4>函数内部属性</h4>
 
-<h3>单体内置对象</h3>
-<h4>global对象</h4>
-Global 对象在某种意义上是作为一个终极的“兜底儿对象” 来定义的。换句话说，不属于任何其他对象的属性和方法，最终都是它的属性和方法。事实上，没有全局变量或全局函数;所有在全局作用域中定义的属性和函数，都是 Global 对象的属性<br>
++ arguments，类数组对象，保存传入函数的所有参数.这个对象还有一个名叫 callee 的属性，该属性是一个指针，指向拥有这个 arguments 对象的函数。
++ this 引用的是函数据以执行的环境对象
++ caller 保存了调用当前函数的函数的引用
++ length 参数个数
++ prototype
++ apply()
++ call()
++ bind()返回一个绑定了新作用域的新函数
 <pre>
-var uri = "http://www.wrox.com/illegal value.htm#start";
-console.log(encodeURI(uri))//不会对本身属于URI的特殊字符进行编码
-console.log(encodeURIComponent(uri))//会使用对应的编码替换所有非字母数字字符
+window.color = "red";
+var o = { color: "blue" };
+function sayColor(){
+    alert(this.color);
+}
+sayColor();     //"red"
+o.sayColor = sayColor;
+o.sayColor();   //"blue"
+sayColor.bind(o)()//'blue'
+function outter(){
+    inner()
+}
+function inner(){
+    console.log(arguments.callee.caller)//[Function: outter]
+}
+outter()
+
+sayColor.length()//0
+//传递参数并非 apply()和 call()真正的用武之地;它们真正强大的地方是能够扩充函数 赖以运行的作用域
+sayColor();
+sayColor.call(this);
+sayColor.call(window);
+sayColor.call(o);
+//red
+//red
+//red
+//blue
 </pre>
-encodeURI不会对本身属于URI的特殊字符进行编码,比如冒号、正斜杠、 问号和井字号等.而encodeURIComponent会用对应的编码替换所有非字母数字字符.一般来说，我们使用 encodeURIComponent()方法的时候要比使用 encodeURI()更多，因为在实践中更常见的是对查询字符串参数而不是对基础 URI 进行编码。与之相对的还有encodeURIComponent和encodeURI。
+
+> 函数的名字仅仅是一个包含指针的变量而已。因此，即使是 在不同的环境中执行，全局的 sayColor()函数与 o.sayColor()指向的仍然是同一 个函数。
+
+> 使用call和apply来扩充作用于的最大好处，就是对象不需要和方法有任何耦合关系。在前面的第一个列子中，我们现实将sayColor函数放在了o对象上然后调用它。而在这里重写的例子中，就不需要先前那个多余的步骤了。
+
+<h2>面向对象的程序设计</h2>
+<h3>对象属性的类型</h3>
+ECMAScript 中有两种属性:数据属性和访问器属性。
+<h4>数据属性</h4>
+数据属性包含一个数据值的位置，在这个位置上可以读取和写入。数据属性有4个描述其行为的特性.<br>
++ configurable 表示能否通过 delete 删除属性从而重新定义属性。默认true
++ enumerable 表示能否通过 for-in 循环返回属性 .默认true
++ writable 表示能否修改属性的值 。默认true
++ value 包含这个属性的数据值.默认undefined
+
+
+要想修改属性默认的特性，必须通过ES5的Object.defineProperty()方法.<br>
 <pre>
- var msg = "hello world";
-eval("alert(msg)");    //"hello world"
+var person = {};
+Object.defineProperty(person, "name", {
+    writable: false,
+    value: "Nicholas"
+});
+alert(person.name); //"Nicholas"
+person.name = "Greg"; 
+alert(person.name); //"Nicholas"
 </pre>
-eval()方法他会将传入的字符串参数当做时间的ECMAScript语句来解析,然后把执行结果插入到原位置.通过 eval()执行的代码被认为是包含该次调用的执行环境的一部分， 因此被执行的代码具有与该执行环境相同的作用域链
+
+> 这个属性的值是不可修改 的，如果尝试为它指定新值，则在非严格模式下，赋值操作将被忽略;在严格模式下，赋值操作将会导 致抛出错误。
+<h3>访问器属性</h3>
+访问器属性不包含数据值,他们包含了一对getter和setter函数.访问器有如下4个特性:
++ configurable 表示能否通过 delete 删除属性从而重新定义属性。默认true
++ enumerable 表示能否通过 for-in 循环返回属性 .默认true
++ get 
++ set 
+访问器属性的常见场景是设置一个属性的值会导致其他属性值得变化.如下:<br>
+<pre>
+var book = {
+    _year : 2004,
+    edition:1
+}
+Object.defineProperty(book,'year',{
+    get:function(){
+        return this._year
+    },
+    set:function(newvalue){
+        if(newvalue>2004){
+            this._year = newvalue
+            this.edition+=newvalue -2004
+        }
+    }
+})
+book.year = 2005
+console.log(book)
+</pre>
+
+> 不一定同步指定set和get.set不存在时表面不可写.get不存在表示不可读.
+> Object.defineProperties()和它类似.
+
+<h4>读取属性的特性</h4>
+使用 ECMAScript 5 的 Object.getOwnPropertyDescriptor()方法，可以取得给定属性的描述 符。
+<pre>
+var namep = Object.getOwnPropertyDescriptor(person,'name')
+console.log(namep)
+//log
+{ value: 'jincc',
+  writable: false,
+  enumerable: false,
+  configurable: false }
+</pre>
