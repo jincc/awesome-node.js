@@ -396,3 +396,36 @@ console.log(namep)
   enumerable: false,
   configurable: false }
 </pre>
+
+<h3>关于this对象</h3>
+this对象在运行时基于函数的执行环节绑定的：在全局函数中，this等于window/global,而当函数作为某个对象的方法时，this等于那个对象.不过，匿名函数的执行环节具有全局性，因此其this对象通常指向window.但有时候由于编写闭包的方式不同，这一点可能不会太明显.
+<pre>
+var name = "The Window";
+var object = {
+    name : "My Object",
+    getNameFunc : function(){
+        //A:
+        //对象内的方法，this指向对象
+        return function(){
+            //每个函数在诶调用后都会自动生成this和arguments.搜索这两个对象时，只会搜索到其活动对象(当前作用域已不属于object)为止，因此永远不会直接访问外部函数的这两个变量(object).在this指向global
+            return this.name;
+        };
+        //修改方法
+        var that = this;//现在that指向了object
+        return function(){}
+            return that.name;
+        };
+} };
+alert(object.getNameFunc()()); //"The Window"
+</pre>
+<h3>块级作用域</h3>
+<pre>
+function outputNumbers(count){
+    (function () {
+        for (var i=0; i < count; i++){
+            alert(i);
+}
+})();
+}
+ 
+</pre>
