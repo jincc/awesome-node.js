@@ -1,5 +1,8 @@
 {
     "name": "file-explorer",
     "version": "0.0.1",
-    "description": "A command-file file explorer"
+    "description": "A command-file file explorer",
+    "devDependencies": {
+        "@types/node": "^10.5.0"
+    }
 }
