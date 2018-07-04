@@ -77,3 +77,13 @@ console.log(process.cwd())
 //node还提供了process.chdir方法来更改工作目录
 process.chdir('/')
 console.log(process.cwd())
+//Node允许通过process.env来轻松访问shell环境下的变量
+// NODE_ENV="production" node index.js
+console.log(process.env.NODE_ENV)
+//退出程序
+console.error('An error occerred')
+process.exit(1)
+//信号 进程与操作系统进行通信的一种方式就是通过信号。比如，要让进程终止，可以发送SIGKILL信号.
+process.on('SIGKILL',()=>{
+    //收到终止信号
+})
