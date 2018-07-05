@@ -5,6 +5,10 @@ process全局对象包含了三个流对象：
  + stdout
  + stderr 
 
+ http://www.jikexueyuan.com/course/1332.html
+ http://www.ruanyifeng.com/blog/2015/05/command-line-with-node.html
+ https://www.jb51.net/article/115622.htm
+
 <pre>
     //等待用户输入，暂停
     stdin.resume()
